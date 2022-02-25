@@ -1,0 +1,23 @@
+{
+  "name": "to-do-v1",
+  "version": "1.0.0",
+  "description": "creation of to do list",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/twelveYearsOldCoder/todo-list.git"
+  },
+  "author": "Nikos kon",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/twelveYearsOldCoder/todo-list/issues"
+  },
+  "homepage": "https://github.com/twelveYearsOldCoder/todo-list#readme",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.3"
+  }
+}
