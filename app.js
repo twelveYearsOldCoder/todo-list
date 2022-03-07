@@ -3,6 +3,7 @@ const app = express();
 const ejs = require("ejs");
 const mongoose = require("mongoose");
 const { urlencoded } = require("express");
+const _ = require("lodash");
 //επειδη εχει οριστει date, καθε φορα θα πρεπει να χρισιμοποιησω την date() Και οχι το ονομα που εχει οριστει στο Module
 const date = require(__dirname + "/date.js");
 app.set('view engine', 'ejs');
@@ -51,7 +52,7 @@ app.get("/", (req, res) => {
             });
             res.redirect("/");
         } else {
-            res.render('list', {listItem: results, listTitle: "Today" });
+            res.render('list', { listItem: results, listTitle: "Today" });
 
         }
 
@@ -62,9 +63,8 @@ app.get("/", (req, res) => {
 
 //dynamicly create pages
 app.get("/:catName", (req, res) => {
-    const reqUrl = req.params.catName;
+    const reqUrl = _.capitalize(req.params.catName);
     List.findOne({ name: reqUrl }, (err, result) => {
-        console.log(reqUrl);
         if (!err) {
             console.log("not error");
             if (!result) {
@@ -74,9 +74,8 @@ app.get("/:catName", (req, res) => {
                     items: defaultItems
                 });
                 list.save();
-                res.redirect("/"+reqUrl);
+                res.redirect("/" + reqUrl);
             } else {
-                console.log("entered else");
                 //   res.render("list", { day: "Today", listItem: result, listTitle:"Grocery" })
                 res.render("list", { day: result.name, listItem: result.items, listTitle: result.name })
             }
@@ -95,22 +94,16 @@ app.post("/", (req, res) => {
     const newItem = new Item({
         name: itemName
     });
-    if(listName==="Today"){
-        console.log("home page");
+    if (listName === "Today") {
         newItem.save();
         res.redirect("/");
-    }else{
-        console.log("custom page");
-        List.findOne({name: listName}, (res, found)=>{
-            console.log("the found object is: " +found);
-            console.log("the new item is "+newItem);
+    } else {
+        List.findOne({ name: listName }, (res, found) => {
             found.items.push(newItem)
-            console.log(newItem);
             found.save();
-            console.log("--------------");
 
         });
-        res.redirect("/"+listName);
+        res.redirect("/" + listName);
     }
 
 });
@@ -118,15 +111,25 @@ app.post("/", (req, res) => {
 
 app.post("/delete", (req, res) => {
     const itemID = req.body.checkbox;
-    Item.deleteOne({ itemID }, (err) => {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            console.log("successfully deleted the item with id " + itemID);
-        }
-    })
-    res.redirect("/");
+    const listName = req.body.listName;
+    if(listName==="Today"){
+        Item.deleteOne({ itemID }, (err) => {
+            if (err) {
+                console.log(err);
+            }
+            else {
+                console.log("successfully deleted the item with id " + itemID);
+            }
+        });
+        res.redirect("/");
+    }else{
+        List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: itemID}}}, (err, result)=>{
+            if(!err){
+                res.redirect("/"+listName);
+            }else console.log(err);
+        });
+    }
+
 });
 
 
