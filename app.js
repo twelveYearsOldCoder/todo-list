@@ -51,7 +51,7 @@ app.get("/", (req, res) => {
             });
             res.redirect("/");
         } else {
-            res.render('list', { day: "Today", listItem: results, listTitle: "Home" });
+            res.render('list', {listItem: results, listTitle: "Today" });
 
         }
 
@@ -78,7 +78,7 @@ app.get("/:catName", (req, res) => {
             } else {
                 console.log("entered else");
                 //   res.render("list", { day: "Today", listItem: result, listTitle:"Grocery" })
-                res.render("list", { day: "Today", listItem: result.items, listTitle: result.name })
+                res.render("list", { day: result.name, listItem: result.items, listTitle: result.name })
             }
         }
     })
@@ -90,11 +90,29 @@ app.get("/:catName", (req, res) => {
 
 app.post("/", (req, res) => {
     const itemName = req.body.todoEntry;
+    //once you press the submit button, the listTitle will be sent to the listname
+    const listName = req.body.list;
     const newItem = new Item({
         name: itemName
-    })
-    newItem.save();
-    res.redirect("/");
+    });
+    if(listName==="Today"){
+        console.log("home page");
+        newItem.save();
+        res.redirect("/");
+    }else{
+        console.log("custom page");
+        List.findOne({name: listName}, (res, found)=>{
+            console.log("the found object is: " +found);
+            console.log("the new item is "+newItem);
+            found.items.push(newItem)
+            console.log(newItem);
+            found.save();
+            console.log("--------------");
+
+        });
+        res.redirect("/"+listName);
+    }
+
 });
 
 
