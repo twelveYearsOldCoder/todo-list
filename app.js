@@ -28,7 +28,7 @@ const item2 = new Item({
     name: "Third"
 });
 
-const defaultItems = [item1, item2, item3];
+const itemList = [item1, item2, item3];
 var workListItem = [];
 
 let today= date.getDate();
@@ -37,7 +37,7 @@ app.get("/", (req, res) => {
     Item.find({},(err, results)=>{
         //only populate the default array the first time
         if(results.length===0){
-            Item.insertMany(defaultItems, (err)=>{
+            Item.insertMany(itemList, (err)=>{
                 if (err){
                     console.log(err);
                 }else {
@@ -65,17 +65,28 @@ app.get("/work", (req, res) => {
 
 
 app.post("/", (req, res) => {
-    if(req.body.list==="Work"){
-        workListItem.push(req.body.todoEntry);
-        res.redirect("/work");
-
-    }else if (req.body.list==="Grocery"){
-        listItem.push(req.body.todoEntry);
-        res.redirect("/");
-
-    }
-
+const itemName = req.body.todoEntry;
+    const newItem = new Item ({
+        name: itemName
+    })
+    newItem.save();
+    res.redirect("/");
 });
+
+
+app.post("/delete", (req, res) => {
+const itemID =req.body.checkbox;
+    Item.deleteOne({itemID}, (err)=>{
+        if(err){
+            console.log(err);
+        }
+        else{
+            console.log("successfully deleted the item with id "+itemID);
+        }
+    })
+       res.redirect("/");
+    });
+
 app.listen(3000, () => {
     console.log("server started at  port 3000");
 })
